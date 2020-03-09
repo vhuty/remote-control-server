@@ -1,0 +1,25 @@
+{
+  "name": "remote-control-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "SET NODE_ENV=development&nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect-redis": "^4.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "morgan-body": "^2.4.8",
+    "pg": "^7.17.0",
+    "redis": "^2.8.0",
+    "sequelize": "^5.21.3",
+    "stompjs": "^2.3.3",
+    "ws": "^7.2.1"
+  }
+}
