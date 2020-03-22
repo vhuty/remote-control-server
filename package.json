@@ -15,6 +15,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
+    "morgan": "^1.9.1",
     "morgan-body": "^2.4.8",
     "pg": "^7.17.0",
     "redis": "^2.8.0",

@@ -57,13 +57,17 @@ class Controller {
 
             await device.addController(controller);
             
-            req.session.cookie.path = `/${ controller.id }/`
+            req.session.cookie.path = `/${ device.id }/`
             req.session.token = {
                 sourceId: controller.id,
                 targetId: device.id
             };
 
-            return res.status(200).json({ device });
+            const { dataValues } = device;
+
+            return res.status(200).json({
+                device: dataValues
+            });
         } catch (err) {
             next(err);
         }

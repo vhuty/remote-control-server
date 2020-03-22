@@ -6,18 +6,18 @@ const http = require('http')
     , session = require('express-session')
     , RedisStore = require('connect-redis')(session)
     , redis = require('redis')
-    , morganBody = require('morgan-body');
+    , morgan = require('morgan');
 
 const config = require('./config')
     , router = require('./routes')
     , { sequelize } = require('./models')
-    , scripts = require('./database/sql')
+    , sqlScripts = require('./database/sql')
     , ws = require('./helpers/ws');
 
 const app = express();
 
 //HTTP requests logging
-morganBody(app);
+app.use(morgan('tiny'));
 
 //CORS mode
 app.use(cors({
@@ -44,38 +44,6 @@ const sessionParser = session({
 
 app.use(sessionParser);
 
-app.get('/qwe123/', (req, res, next) => {
-    next();
-});
-
-app.get('/desk/', (req, res, next) => {
-    req.session.cookie.path = '/qwe456/';
-
-    req.session.a = 12;
-
-    next();
-});
-
-app.get('/desk2/', (req, res, next) => {
-    req.session.cookie.path = '/qwe123/';
-
-    req.session.token = {
-        sourceId: '459f523c-60e4-4ad5-b578-4835f4a6175a'
-    };
-
-    res.end();
-});
-
-// app.get('/dev/', (req, res, next) => {
-//     req.session.token = { sourceId: 'adsasdasdasdasd' };
-//     res.end();
-// });
-
-// app.get('/ctrl/', (req, res, next) => {
-//     req.session.token = { sourceId: '12j1h3jkg12kjh1', targetId: 'adsasdasdasdasd' };
-//     res.end();
-// });
-
 //Routes entry point
 app.use(router);
 
@@ -84,11 +52,13 @@ ws.attach(server, sessionParser);
 
 //Checking ORM availability
 (async _ => {
-    await sequelize.authenticate();
-    await sequelize.sync(config.pg.options);
-    await scripts.init(sequelize);
+    const { pg, port } = config;
 
-    server.listen(config.port, _ => {
-        console.log(`Express server's been started on port: ${ config.port }`);
+    await sequelize.authenticate();
+    await sequelize.sync(pg.options);
+    await sqlScripts.init(sequelize);
+
+    server.listen(port, _ => {
+        console.log(`Express server's been started on port: ${ port }`);
     });
 })().catch(console.error);

@@ -38,24 +38,6 @@ const deviceRequired = async (req, res, next) => {
     return next();
 }
 
-const injectCookie = (req) => {
-    const { headers, url } = req;
-    if(headers.cookie) {
-        return;
-    }
-
-    const params = new URLSearchParams(url.slice(1));
-    const token = params.get('token');
-
-    if(!token) {
-        return;
-    }
-
-    req.headers.cookie = token;
-
-    return req;
-}
-
 const errorHandler = (err, req, res, next) => {
     console.error(err);
 
@@ -77,6 +59,5 @@ const errorHandler = (err, req, res, next) => {
 module.exports = {
     controllerRequired,
     deviceRequired,
-    injectCookie,
     errorHandler
 }

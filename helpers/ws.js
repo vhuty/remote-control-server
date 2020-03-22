@@ -1,117 +1,158 @@
 const WebSocket = require('ws');
 
-const { injectCookie } = require('../middlewares');
+module.exports.attach = (server, __parser) => {
 
-module.exports.attach = (server, parser) => {
+    //Pool of channels (objects that contains source instance and target instances) 
     const __pool = new Map();
 
+    server.on('upgrade', __toWS);
+
     const wss = new WebSocket.Server({ noServer: true });
+    wss.on('connection', __init);
 
-    server.on('upgrade', (req, socket, head) => {
-        //njectCookie(req);
-
+    /**
+     * 
+     * @param {*} req Request incoming message
+     * @param {*} socket Duplex stream
+     * @param {*} head Buffer
+     */
+    function __toWS(req, socket, head) {
         wss.handleUpgrade(req, socket, head, (ws) => {
-            
-            parser(req, {}, _ => {
-                if(!req.session.token) {
+            __parser(req, {}, _ => {
+                const { token } = req.session;
+
+                if(!token) {
                     socket.destroy();
+
                     return;
                 }
 
-                const { token } = req.session;
-                ws.token = token;
+                const hasTarget = token.hasOwnProperty('targetId');
 
-                wss.emit('connection', ws);
+                wss.emit('connection', { ws, token, hasTarget });
             });
         });
-    });
+    }
 
-    wss.on('connection', (socket) => {
-        const { sourceId, targetId } = socket.token;
+    /**
+     * 
+     * @param {Object} connection A incoming request connection object
+     */
+    function __init(connection) {
+        const { ws, token, hasTarget } = connection;
 
-        onConnection();
+        if(hasTarget) {
+            initTarget(ws, token);
+        } else {
+            initSource(ws, token);
+        }
+
+        //TODO: realize error logging
+        ws.on('error', (err) => {
+            console.error(`[WSERROR]: `, err);
+        });
+    }
+
+    /**
+     * 
+     * @param {WebSocket} socket Source entity connection (Desktop device)
+     * @param {Object} token An authorization object
+     */
+    function initSource(socket, token) {
+        const { sourceId, targetId } = token;
+
+        const channel = {
+            device: socket,
+            controllers: new Map()
+        }
+
+        __pool.set(sourceId, channel);
+
+        //Initialize handlers
 
         socket.on('message', (data) => {
-            let channel = {};
+            const channel = __pool.get(sourceId);
 
-            channel = __pool.get(targetId);
             if(channel) {
-                const { device } = channel;
-                device.emit('data', data);
+                //Requesting entity - desktop device
 
-                return;
-            }
-
-            channel = __pool.get(sourceId);
-            if(channel) {
                 const { controllers } = channel;
-                [ ... controllers.values() ].forEach(controller => {
-                    controller.emit('data', data);
-                });
 
-                return;
-            }
-
-            socket.close(4000, 'No target');
-        });
-
-        socket.on('data', (data) => {
-            socket.send(data, (err) => {
-                if(err) {
-                    console.error('[ERROR]: ', err);
+                for (const controller of controllers.values()) {
+                    controller.send(data, (err) => {
+                        if(err) {
+                            console.error('[WSERROR]: ', err);
+                        }
+                    });
                 }
-            });
-        })
+            }
+        });
         
         socket.on('close', (code, reason) => {
-            console.log(`[CLOSE]: id: ${ sourceId }, code: ${ code }, reason: ${ reason }`);
-            
-            let channel = {};
+            console.log(`[WSCLOSE]: sourceId: ${ sourceId }, targetId: ${ targetId }, code: ${ code }, reason: ${ reason }`);
 
-            channel = __pool.get(targetId);
+            const channel = __pool.get(sourceId);
             if(channel) {
+                //Requesting entity - desktop device
+
                 const { controllers } = channel;
+
+                for (const controller of controllers.values()) {
+                    controller.close(1001, 'Device is currently offline');
+                }
+
+                __pool.delete(sourceId);
+            }
+        });
+    }
+
+
+    /**
+     * 
+     * @param {WebSocket} socket Target entity connection (Mobile device)
+     * @param {Object} token An authorization object
+     */
+    function initTarget(socket, token) {
+        const { sourceId, targetId } = token;
+
+        const channel = __pool.get(targetId);
+        if(!channel) {
+            return socket.close(4004, 'Target not found');
+        }
+
+        channel.controllers.set(sourceId, socket);
+
+        //Initialize handlers
+
+        socket.on('message', (data) => {
+            const channel = __pool.get(targetId);
+            if(channel) {
+                //Requesting entity - mobile device
+
+                const { device } = channel;
+
+                device.send(data, (err) => {
+                    if(err) {
+                        console.error('[WSERROR]: ', err);
+                    }
+                });
+            }
+        });
+
+        socket.on('close', (code, reason) => {
+            console.log(`[WSCLOSE]: sourceId: ${ sourceId }, targetId: ${ targetId }, code: ${ code }, reason: ${ reason }`);
+            
+
+            const channel = __pool.get(targetId);
+            if(channel) {
+                //Requesting entity - mobile device
+
+                const { controllers } = channel;
+
                 controllers.delete(sourceId);
 
                 return;
             }
-
-            channel = __pool.get(sourceId);
-            if(channel) {
-                __pool.delete(sourceId);
-
-                return;
-            }
         });
-
-        socket.on('error', (err) => {
-            console.error(`[ERROR]: `, err);
-        });
-
-        function onConnection() {
-            console.log('CONNECTED');
-
-            if(!sourceId) {
-                return socket.close(4003, 'Not authorized');
-            }
-    
-            if(targetId) {
-                const _channel = __pool.get(targetId);
-                if(!_channel) {
-                    return socket.close(4000, 'No target');
-                }
-    
-                _channel.controllers.set(sourceId, socket);
-
-                return;
-            }
-    
-            const channel = {
-                device: socket,
-                controllers: new Map()
-            }
-    
-            __pool.set(sourceId, channel);
-        }
-    });
+    }
 }
