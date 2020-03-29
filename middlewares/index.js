@@ -39,14 +39,16 @@ const deviceRequired = async (req, res, next) => {
 }
 
 const errorHandler = (err, req, res, next) => {
-    console.error(err);
-
     const response = {
         message: 'Something went wrong...',
         status: 500
     };
 
-    if(!(err instanceof Error)) {
+    if(err instanceof Error) {
+        //TODO: enable logs
+
+        console.error(err);
+    } else {
         const { status, message } = err;
 
         response.status = status;

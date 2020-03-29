@@ -52,10 +52,18 @@ ws.attach(server, sessionParser);
 
 //Checking ORM availability
 (async _ => {
-    const { pg, port } = config;
+    const { 
+        pg: {
+            options: {
+                sync,
+                alter
+            }
+        }, 
+        port
+    } = config;
 
     await sequelize.authenticate();
-    await sequelize.sync(pg.options);
+    await sequelize.sync({ ... sync, alter });
     await sqlScripts.init(sequelize);
 
     server.listen(port, _ => {

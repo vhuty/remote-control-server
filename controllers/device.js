@@ -2,26 +2,42 @@
 
 const models = require('../models');
 
-const deviceService = require('../services/device');
+const { error } = require('../helpers');
 
 class Controller {
     async register(req, res, next) {
         const { 
             device,
             body: {
-                id, meta
+                id,
+                data
             } 
         } = req;
         
         try {
             if(device) {
-                throw new Error('400, Already registered');
+                throw error.badRequest('Already registered');
             }
 
-            const key = _generateRandomKey();
+            if(!data) {
+                throw error.badRequest('Missing input data');
+            }
 
-            await models.Device.create({
-                id, key, ... meta
+            const {
+                meta: {
+                    name = null,
+                    type = null
+                } = {}
+            } = data;
+
+            const instance = {
+                id, name, type
+            }
+
+            await models.Device.create(instance);
+
+            return res.status(201).json({
+                payload: 'OK'
             });
         } catch (err) {
             next(err);
@@ -30,12 +46,19 @@ class Controller {
 
     async listen(req, res, next) {
         try {   
-            const device = req.device;
+            const { device } = req;
+
             if(!device) {
-                throw new Error('401, Not registered');
+                throw error.unauthorized('Not registered');
             }
 
-            const { id, key } = device;
+            const { id } = device;
+
+            const key = _generateRandomKey();
+
+            await models.Device.update({ key }, {
+                where: { id }
+            });
             
             req.session.token = {
                 sourceId: id
@@ -47,10 +70,6 @@ class Controller {
         }
     }
 
-    async stop(req, res, next) {
-        
-    }
-
     async getControllers(req, res, next) {
         const { id } = req.params;
 
@@ -60,12 +79,14 @@ class Controller {
                 req.device
             
             if(!device) {
-                throw new Error('400, Bad request');
+                throw error.badRequest('Missing device entity');
             }
 
-            const controllers = await device.getControllers();
+            const controllers = await deviceService.getControllersById(device.id);
 
-            return res.status(200).json({ data: controllers || [] });
+            return res.status(200).json({ 
+                data: controllers || [] 
+            });
         } catch (err) {
             next(err);
         }

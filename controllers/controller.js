@@ -5,26 +5,33 @@ const models = require('../models');
 const { session } = require('../config')
     , { error } = require('../helpers');
 
-const controllerService = require('../services/controller');
-
 class Controller {
     async register(req, res, next) {
         const { 
             controller,
             ip,
             body: {
-                id, meta
+                data
             } 
         } = req;
 
         try {
             if(controller) {
-                throw new Error('400, Already registered');
+                throw error.badRequest('Already registered');
             }
 
-            await models.Controller.create({
-                id, ip, ... meta
-            });
+            const { 
+                id = null, 
+                meta: {
+                    name = null
+                } = {}
+            } = data;
+
+            const instance = {
+                id, ip, name
+            };
+
+            await models.Controller.create(instance);
 
             return res.status(201).json({ payload: 'OK' });
         } catch (err) {
@@ -110,13 +117,9 @@ class Controller {
     }
 
     async getDevices(req, res, next) {
-        const { id } = req.params;
+        const { controller } = req;
 
         try {
-            const controller = id ?
-                await controllerService.getControllerById(id) :
-                req.controller
-            
             if(!controller) {
                 throw error.badRequest('Wrong target');
             }

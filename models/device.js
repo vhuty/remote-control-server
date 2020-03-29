@@ -10,18 +10,18 @@ module.exports = (sequelize, DataTypes) => {
 				allowNull: false,
 				primaryKey: true
 			},
+			ip: {
+                type: DataTypes.STRING
+            },
 			key: {
-				type: DataTypes.STRING,
-				allowNull: false
+				type: DataTypes.STRING
 			},
 			name: {
-				type: DataTypes.STRING,
-				allowNull: false
-            },
-            ip: {
-                type: DataTypes.STRING,
-				allowNull: false
-            }
+				type: DataTypes.STRING
+			},
+			type: {
+				type: DataTypes.STRING
+			}
 		}
 	);
 
