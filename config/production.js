@@ -44,7 +44,8 @@ class Config {
 
         this.redis = {
             port: process.env.RDS_PORT || 6379,
-            host: process.env.RDS_HOST || 'localhost'
+            host: process.env.RDS_HOST || 'localhost',
+            password: process.env.RDS_PASSWORD || null
         }
     }
 }
