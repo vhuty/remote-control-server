@@ -9,7 +9,6 @@ class Controller {
     async register(req, res, next) {
         const { 
             controller,
-            ip,
             body: {
                 data
             } 
@@ -20,6 +19,10 @@ class Controller {
                 throw error.badRequest('Already registered');
             }
 
+            if(!data) {
+                throw error.badRequest('Missing input data');
+            }
+
             const { 
                 id = null, 
                 meta: {
@@ -28,12 +31,12 @@ class Controller {
             } = data;
 
             const instance = {
-                id, ip, name
+                id, name
             };
 
             await models.Controller.create(instance);
 
-            return res.status(201).json({ payload: 'OK' });
+            return res.status(201).end();
         } catch (err) {
             next(err);
         }
@@ -64,7 +67,7 @@ class Controller {
 
             await device.addController(controller);
             
-            req.session.cookie.path = `/${ device.id }/`
+            req.session.cookie.path = `/${ device.id }/`;
             req.session.token = {
                 sourceId: controller.id,
                 targetId: device.id

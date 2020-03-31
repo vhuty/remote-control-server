@@ -11,12 +11,10 @@ module.exports = (sequelize, DataTypes) => {
 				primaryKey: true
 			},
 			name: {
-				type: DataTypes.STRING,
-				allowNull: false
+				type: DataTypes.STRING
             },
             ip: {
-                type: DataTypes.STRING,
-				allowNull: false
+                type: DataTypes.STRING
 			}
 		}
 	);
