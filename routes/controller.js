@@ -7,8 +7,8 @@ const controller = require('../controllers/controller');
 const router = Router();
 
 router.post('/', controller.register);
-router.post('/bind', controller.bind);
-router.delete('/bind', controller.unbind);
-router.get('/:id/devices/', controller.getDevices);
+router.post('/bind/', controller.bind);
+router.delete('/bind/', controller.unbind);
+router.get('/devices/', controller.getDevices);
 
 module.exports = router;
