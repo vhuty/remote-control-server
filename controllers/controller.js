@@ -10,7 +10,7 @@ class Controller {
         const { 
             controller,
             body: {
-                data
+                id, data
             } 
         } = req;
 
@@ -23,8 +23,7 @@ class Controller {
                 throw error.badRequest('Missing input data');
             }
 
-            const { 
-                id = null, 
+            const {
                 meta: {
                     name = null
                 } = {}
