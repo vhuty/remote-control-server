@@ -11,5 +11,9 @@ module.exports = {
     
     unauthorized: (message = 'Unauthorized') => {
         return _error(message, 401);
+    },
+
+    forbidden: (message = 'Forbidden') => {
+        return _error(message, 403);
     }
 }
