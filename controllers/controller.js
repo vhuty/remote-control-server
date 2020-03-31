@@ -119,9 +119,13 @@ class Controller {
     }
 
     async getDevices(req, res, next) {
-        const { controller } = req;
+        const { id } = req.params;
 
         try {
+            const controller = await models.Controller.findOne({
+                where: { id }
+            });
+
             if(!controller) {
                 throw error.badRequest('Wrong target');
             }
