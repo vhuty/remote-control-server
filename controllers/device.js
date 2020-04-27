@@ -2,37 +2,32 @@
 
 const models = require('../models');
 
-const { session } = require('../config')
-    , { error } = require('../helpers');
+const { session } = require('../config'),
+    { error } = require('../helpers');
 
 class Controller {
     async register(req, res, next) {
-        const { 
+        const {
             device,
-            body: {
-                id, data
-            } 
+            body: { id, data },
         } = req;
-        
+
         try {
-            if(device) {
+            if (device) {
                 throw error.badRequest('Already registered');
             }
 
-            if(!data) {
+            if (!data) {
                 throw error.badRequest('Missing input data');
             }
 
-            const {
-                meta: {
-                    name = null,
-                    type = null
-                } = {}
-            } = data;
+            const { meta: { name = null, type = null } = {} } = data;
 
             const instance = {
-                id, name, type
-            }
+                id,
+                name,
+                type,
+            };
 
             await models.Device.create(instance);
 
@@ -46,7 +41,7 @@ class Controller {
         const { device } = req;
 
         try {
-            if(!device) {
+            if (!device) {
                 throw error.unauthorized('Not registered');
             }
 
@@ -54,12 +49,15 @@ class Controller {
 
             const key = _generateRandomKey();
 
-            await models.Device.update({ key }, {
-                where: { id }
-            });
-            
+            await models.Device.update(
+                { key },
+                {
+                    where: { id },
+                }
+            );
+
             req.session.token = {
-                sourceId: id
+                sourceId: id,
             };
 
             return res.status(200).json({ key });
@@ -72,18 +70,18 @@ class Controller {
         const { device } = req;
 
         try {
-            if(!device) {
+            if (!device) {
                 throw error.unauthorized('Not registered');
             }
 
             const { id: deviceId } = device;
 
             await models.DeviceController.destroy({
-                where: { deviceId }
+                where: { deviceId },
             });
 
-            req.session.destroy((err) => { 
-                if(err) {
+            req.session.destroy((err) => {
+                if (err) {
                     return next(err);
                 }
 
@@ -100,19 +98,38 @@ class Controller {
         const { id } = req.params;
 
         try {
-            const device = id ?
-                await deviceService.getDeviceById(id) :
-                req.device
-            
-            if(!device) {
-                throw error.badRequest('Missing device entity');
+            const device = await models.Device.findOne({
+                where: { id },
+            });
+
+            if (!device) {
+                throw error.badRequest('Wrong target');
             }
 
-            const controllers = await deviceService.getControllersById(device.id);
+            const controllers = await device.getControllers();
 
-            return res.status(200).json({ 
-                data: controllers || [] 
+            return res.status(200).json({
+                data: controllers || [],
             });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    async getDevice(req, res, next) {
+        const { id } = req.params;
+
+        try {
+            const device = await models.Device.findOne({
+                where: { id },
+                raw: true,
+            });
+
+            if (!device) {
+                throw error.badRequest('Wrong target');
+            }
+
+            return res.status(200).json(device);
         } catch (err) {
             next(err);
         }
@@ -120,7 +137,10 @@ class Controller {
 }
 
 function _generateRandomKey() {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return (
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15)
+    );
 }
 
 module.exports = new Controller();

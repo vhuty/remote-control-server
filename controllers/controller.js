@@ -2,35 +2,30 @@
 
 const models = require('../models');
 
-const { session } = require('../config')
-    , { error } = require('../helpers');
+const { session } = require('../config'),
+    { error } = require('../helpers');
 
 class Controller {
     async register(req, res, next) {
-        const { 
+        const {
             controller,
-            body: {
-                id, data
-            } 
+            body: { id, data },
         } = req;
 
         try {
-            if(controller) {
+            if (controller) {
                 throw error.badRequest('Already registered');
             }
 
-            if(!data) {
+            if (!data) {
                 throw error.badRequest('Missing input data');
             }
 
-            const {
-                meta: {
-                    name = null
-                } = {}
-            } = data;
+            const { meta: { name = null } = {} } = data;
 
             const instance = {
-                id, name
+                id,
+                name,
             };
 
             await models.Controller.create(instance);
@@ -43,39 +38,39 @@ class Controller {
 
     async bind(req, res, next) {
         const { key } = req.body;
-        
-        try {   
+
+        try {
             const { controller } = req;
-            if(!controller) {
+            if (!controller) {
                 throw error.unauthorized('Not registered');
             }
-            
+
             const device = await models.Device.findOne({
                 where: { key },
-                attributes: [ 'id', 'name', 'ip' ]
+                attributes: ['id', 'name', 'ip'],
             });
 
-            if(!device) {
+            if (!device) {
                 throw error.badRequest('Wrong target');
             }
 
             const hasController = await device.hasController(controller);
-            if(hasController) {
+            if (hasController) {
                 throw error.badRequest('Already linked...');
             }
 
             await device.addController(controller);
-            
-            req.session.cookie.path = `/${ device.id }/`;
+
+            req.session.cookie.path = `/${device.id}/`;
             req.session.token = {
                 sourceId: controller.id,
-                targetId: device.id
+                targetId: device.id,
             };
 
             const { dataValues } = device;
 
             return res.status(200).json({
-                device: dataValues
+                device: dataValues,
             });
         } catch (err) {
             next(err);
@@ -85,27 +80,27 @@ class Controller {
     async unbind(req, res, next) {
         const {
             body: { key },
-            controller
+            controller,
         } = req;
-        
-        try {   
-            if(!controller) {
+
+        try {
+            if (!controller) {
                 throw error.unauthorized('Not registered');
             }
-            
+
             const device = await models.Device.findOne({
                 where: { key },
-                attributes: [ 'id' ]
+                attributes: ['id'],
             });
 
-            if(!device) {
+            if (!device) {
                 throw error.badRequest('Wrong target');
             }
 
             await device.removeController(controller);
-            
-            req.session.destroy((err) => { 
-                if(err) {
+
+            req.session.destroy((err) => {
+                if (err) {
                     return next(err);
                 }
 
@@ -123,18 +118,37 @@ class Controller {
 
         try {
             const controller = await models.Controller.findOne({
-                where: { id }
+                where: { id },
             });
 
-            if(!controller) {
+            if (!controller) {
                 throw error.badRequest('Wrong target');
             }
 
             const devices = await controller.getDevices();
 
             return res.status(200).json({
-                data: devices || [] 
+                data: devices || [],
             });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    async getController(req, res, next) {
+        const { id } = req.params;
+
+        try {
+            const controller = await models.Controller.findOne({
+                where: { id },
+                raw: true,
+            });
+
+            if (!controller) {
+                throw error.badRequest('Wrong target');
+            }
+
+            return res.status(200).json(controller);
         } catch (err) {
             next(err);
         }

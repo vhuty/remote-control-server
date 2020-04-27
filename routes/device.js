@@ -9,7 +9,7 @@ const router = Router();
 router.post('/', device.register);
 router.put('/listen', device.listen);
 router.put('/stop', device.stop);
-
 router.get('/:id/controllers/', device.getControllers);
+router.get('/:id/', device.getDevice);
 
 module.exports = router;

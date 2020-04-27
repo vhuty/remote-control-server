@@ -10,5 +10,6 @@ router.post('/', controller.register);
 router.post('/bind/', controller.bind);
 router.delete('/bind/', controller.unbind);
 router.get('/:id/devices/', controller.getDevices);
+router.get('/:id/', controller.getController);
 
 module.exports = router;

@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "."
+		},
+		{
+			"path": "/home/username/GitHub/remote-control-client-desktop"
 		}
 	],
 	"settings": {}
