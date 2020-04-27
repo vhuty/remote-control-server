@@ -1,8 +1,7 @@
 const WebSocket = require('ws');
 
 module.exports.attach = (server, __parser) => {
-
-    //Pool of channels (objects that contains source instance and target instances) 
+    //Pool of channels (objects that contains source instance and target instances)
     const __pool = new Map();
 
     server.on('upgrade', __toWS);
@@ -11,17 +10,17 @@ module.exports.attach = (server, __parser) => {
     wss.on('connection', __init);
 
     /**
-     * 
+     *
      * @param {*} req Request incoming message
      * @param {*} socket Duplex stream
      * @param {*} head Buffer
      */
     function __toWS(req, socket, head) {
         wss.handleUpgrade(req, socket, head, (ws) => {
-            __parser(req, {}, _ => {
+            __parser(req, {}, (_) => {
                 const { token } = req.session;
 
-                if(!token) {
+                if (!token) {
                     socket.destroy();
 
                     return;
@@ -35,13 +34,13 @@ module.exports.attach = (server, __parser) => {
     }
 
     /**
-     * 
+     *
      * @param {Object} connection A incoming request connection object
      */
     function __init(connection) {
         const { ws, token, hasTarget } = connection;
 
-        if(hasTarget) {
+        if (hasTarget) {
             initTarget(ws, token);
         } else {
             initSource(ws, token);
@@ -54,7 +53,7 @@ module.exports.attach = (server, __parser) => {
     }
 
     /**
-     * 
+     *
      * @param {WebSocket} socket Source entity connection (Desktop device)
      * @param {Object} token An authorization object
      */
@@ -63,8 +62,8 @@ module.exports.attach = (server, __parser) => {
 
         const channel = {
             device: socket,
-            controllers: new Map()
-        }
+            controllers: new Map(),
+        };
 
         __pool.set(sourceId, channel);
 
@@ -73,26 +72,28 @@ module.exports.attach = (server, __parser) => {
         socket.on('message', (data) => {
             const channel = __pool.get(sourceId);
 
-            if(channel) {
+            if (channel) {
                 //Requesting entity - desktop device
 
                 const { controllers } = channel;
 
                 for (const controller of controllers.values()) {
                     controller.send(data, (err) => {
-                        if(err) {
+                        if (err) {
                             console.error('[WSERROR]: ', err);
                         }
                     });
                 }
             }
         });
-        
+
         socket.on('close', (code, reason) => {
-            console.log(`[WSCLOSE]: sourceId: ${ sourceId }, targetId: ${ targetId }, code: ${ code }, reason: ${ reason }`);
+            console.log(
+                `[WSCLOSE]: sourceId: ${sourceId}, targetId: ${targetId}, code: ${code}, reason: ${reason}`
+            );
 
             const channel = __pool.get(sourceId);
-            if(channel) {
+            if (channel) {
                 //Requesting entity - desktop device
 
                 const { controllers } = channel;
@@ -106,9 +107,8 @@ module.exports.attach = (server, __parser) => {
         });
     }
 
-
     /**
-     * 
+     *
      * @param {WebSocket} socket Target entity connection (Mobile device)
      * @param {Object} token An authorization object
      */
@@ -116,23 +116,33 @@ module.exports.attach = (server, __parser) => {
         const { sourceId, targetId } = token;
 
         const channel = __pool.get(targetId);
-        if(!channel) {
+        if (!channel) {
             return socket.close(4004, 'Target not found');
         }
 
-        channel.controllers.set(sourceId, socket);
+        const { device, controllers } = channel;
+
+        controllers.set(sourceId, socket);
+
+        //Ping message
+        const message = {
+            ping: {
+                id: sourceId,
+            },
+        };
+
+        device.send(JSON.stringify(message));
 
         //Initialize handlers
-
         socket.on('message', (data) => {
             const channel = __pool.get(targetId);
-            if(channel) {
+            if (channel) {
                 //Requesting entity - mobile device
 
                 const { device } = channel;
 
                 device.send(data, (err) => {
-                    if(err) {
+                    if (err) {
                         console.error('[WSERROR]: ', err);
                     }
                 });
@@ -140,11 +150,12 @@ module.exports.attach = (server, __parser) => {
         });
 
         socket.on('close', (code, reason) => {
-            console.log(`[WSCLOSE]: sourceId: ${ sourceId }, targetId: ${ targetId }, code: ${ code }, reason: ${ reason }`);
-            
+            console.log(
+                `[WSCLOSE]: sourceId: ${sourceId}, targetId: ${targetId}, code: ${code}, reason: ${reason}`
+            );
 
             const channel = __pool.get(targetId);
-            if(channel) {
+            if (channel) {
                 //Requesting entity - mobile device
 
                 const { controllers } = channel;
@@ -155,4 +166,4 @@ module.exports.attach = (server, __parser) => {
             }
         });
     }
-}
+};
