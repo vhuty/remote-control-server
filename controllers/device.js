@@ -46,11 +46,10 @@ class Controller {
             }
 
             const { id } = device;
-
             const key = _generateRandomKey();
 
             await models.Device.update(
-                { key },
+                { key, status: 'online' },
                 {
                     where: { id },
                 }
@@ -74,11 +73,16 @@ class Controller {
                 throw error.unauthorized('Not registered');
             }
 
-            const { id: deviceId } = device;
+            const { id } = device;
 
-            await models.DeviceController.destroy({
-                where: { deviceId },
-            });
+            await models.Device.update(
+                {
+                    status: 'offline',
+                },
+                {
+                    where: { id },
+                }
+            );
 
             req.session.destroy((err) => {
                 if (err) {

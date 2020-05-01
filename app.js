@@ -12,7 +12,7 @@ const config = require('./config')
     , router = require('./routes')
     , { sequelize } = require('./models')
     , sqlScripts = require('./database/sql')
-    , ws = require('./helpers/ws');
+    , ws = require('./ws');
 
 const app = express();
 
