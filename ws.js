@@ -125,9 +125,13 @@ module.exports.attach = (server, __parser) => {
         controllers.set(sourceId, socket);
 
         //Ping message
-        device.emit('connection', {
-            id: sourceId,
-        });
+        const message = {
+            ping: {
+                id: sourceId,
+            },
+        };
+
+        device.send(JSON.stringify(message));
 
         //Initialize handlers
         socket.on('message', (data) => {
