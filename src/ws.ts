@@ -1,6 +1,8 @@
 import WebSocket from 'ws';
 import HTTP from 'http';
 
+import config from './config';
+
 const attach = (server: HTTP.Server, parser: any) => {
   /* Pool of connections */
   const __pool: Map<string, Connection> = new Map();
@@ -36,6 +38,18 @@ const attach = (server: HTTP.Server, parser: any) => {
       status: Status.ONLINE,
     });
 
+    const {
+      ws: { heartbeat, latency },
+    } = config;
+
+    /* 
+      Heartbeat mechanism to prevent 
+      premature disconnecting by environment
+    */
+    const interval = setInterval(() => {
+      ws.ping();
+    }, heartbeat + latency);
+
     /* WebSocket event handlers */
     ws.on('message', (message: string) => {
       const data: Message = JSON.parse(message);
@@ -65,6 +79,7 @@ const attach = (server: HTTP.Server, parser: any) => {
       );
 
       __pool.delete(token.source);
+      clearInterval(interval);
 
       /* Notify of status changing */
       multicast(token, {

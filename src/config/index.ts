@@ -27,7 +27,7 @@ export default {
     cookie: {
       httpOnly:
         typeof env.HTTP_ONLY !== undefined ? env.HTTP_ONLY === 'true' : false,
-      maxAge: +env.SESSION_LIFETIME_H * 1000 * 60 * 60, // In miliseconds
+      maxAge: +env.SESSION_LIFETIME_H * 1000 * 60 * 60, // In milliseconds
       sameSite: 'none',
     },
   },
@@ -57,5 +57,9 @@ export default {
   redis: {
     port: +env.RDS_PORT,
     host: env.RDS_HOST,
+  },
+  ws: {
+    heartbeat: +env.WS_HEARTBEAT_S * 1000, // In milliseconds
+    latency: +env.WS_LATENCY_S * 1000, // In milliseconds
   },
 };
