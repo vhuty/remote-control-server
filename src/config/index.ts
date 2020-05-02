@@ -57,6 +57,7 @@ export default {
   redis: {
     port: +env.RDS_PORT,
     host: env.RDS_HOST,
+    password: env.RDS_PASSWORD
   },
   ws: {
     heartbeat: +env.WS_HEARTBEAT_S * 1000, // In milliseconds
