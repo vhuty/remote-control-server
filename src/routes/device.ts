@@ -1,8 +1,6 @@
-'use strict';
+import { Router } from 'express';
 
-const { Router } = require('express');
-
-const device = require('../controllers/device');
+import device from '../controllers/device';
 
 const router = Router();
 
@@ -12,4 +10,4 @@ router.put('/stop', device.stop);
 router.get('/:id/controllers/', device.getControllers);
 router.get('/:id/', device.getDevice);
 
-module.exports = router;
+export default router;
