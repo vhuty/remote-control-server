@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
 import models from '../models';
-import config from '../config';
 import { badRequest, unauthorized } from '../helpers/error';
 
 class Controller {
@@ -37,6 +36,27 @@ class Controller {
     }
   }
 
+  async sync(req: Request, res: Response, next: NextFunction) {
+    const {
+      //@ts-ignore
+      controller,
+    } = req;
+
+    if (!controller) {
+      throw unauthorized('Not registered');
+    }
+
+    const devices = await controller.getDevices();
+    const targets = devices.map(({ id }) => id);
+
+    req.session.token = {
+      source: controller.id,
+      targets,
+    };
+
+    return res.status(204).end();
+  }
+
   async bind(req: Request, res: Response, next: NextFunction) {
     const {
       body: { key },
@@ -65,14 +85,6 @@ class Controller {
       }
 
       await controller.addDevice(device);
-
-      const devices = await controller.getDevices();
-      const targets = devices.map(({ id }) => id);
-
-      req.session.token = {
-        source: controller.id,
-        targets,
-      };
 
       return res.status(200).json(device);
     } catch (err) {
@@ -103,15 +115,7 @@ class Controller {
 
       await device.removeController(controller);
 
-      req.session.destroy((err) => {
-        if (err) {
-          return next(err);
-        }
-
-        res.clearCookie(config.session.name);
-
-        return res.status(204).json();
-      });
+      return res.status(204).end();
     } catch (err) {
       next(err);
     }
@@ -132,7 +136,7 @@ class Controller {
 
       const devices = await controller.getDevices();
 
-      return res.status(200).json(devices || []); 
+      return res.status(200).json(devices || []);
     } catch (err) {
       next(err);
     }

@@ -81,11 +81,13 @@ const attach = (server: HTTP.Server, parser: any) => {
       __pool.delete(token.source);
       clearInterval(interval);
 
-      /* Notify of status changing */
-      multicast(token, {
-        source: token.source,
-        status: Status.OFFLINE,
-      });
+      if (code !== Codes.UPDATE_CREDENTIALS) {
+        /* Notify of status changing */
+        multicast(token, {
+          source: token.source,
+          status: Status.OFFLINE,
+        });
+      }
     });
 
     //TODO: implement error logging
@@ -136,6 +138,10 @@ type Message = {
 enum Status {
   ONLINE = 'online',
   OFFLINE = 'offline',
+}
+
+enum Codes {
+  UPDATE_CREDENTIALS = 4001,
 }
 
 export default {
