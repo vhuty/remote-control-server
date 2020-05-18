@@ -1,6 +1,8 @@
 import { MODEL } from '../constants';
 import { Sequelize, DataTypes } from 'sequelize';
 
+import { Status } from '../constants';
+
 export default (sequelize: Sequelize) => {
   const device = sequelize.define(MODEL.DEVICE, {
     id: {
@@ -22,6 +24,8 @@ export default (sequelize: Sequelize) => {
     },
     status: {
       type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: Status.OFFLINE,
     },
   });
 

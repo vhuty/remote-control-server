@@ -2,6 +2,7 @@ import WebSocket from 'ws';
 import HTTP from 'http';
 
 import config from './config';
+import { Status } from './constants';
 
 const attach = (server: HTTP.Server, parser: any) => {
   /* Pool of connections */
@@ -104,7 +105,15 @@ const attach = (server: HTTP.Server, parser: any) => {
       } = connection;
 
       if (
+        /* 
+          Scope connection has targets list and 
+          includes current iteration connection as target
+        */
         (token.targets && token.targets.includes(source)) ||
+        /* 
+          Current iteration connection has targets list and 
+          includes scope connection as target
+        */
         (targets && targets.includes(token.source))
       ) {
         const data = JSON.stringify(message);
@@ -133,12 +142,8 @@ type Message = {
   target?: string;
   status?: string;
   data?: string;
+  signal?: string;
 };
-
-enum Status {
-  ONLINE = 'online',
-  OFFLINE = 'offline',
-}
 
 enum Codes {
   UPDATE_CREDENTIALS = 4001,

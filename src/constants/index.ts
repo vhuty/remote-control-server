@@ -3,3 +3,8 @@ export const MODEL = {
   CONTROLLER: 'Controller',
   DEVICE_CONTROLLER: 'DeviceController',
 };
+
+export const enum Status {
+  ONLINE = 'online',
+  OFFLINE = 'offline'
+};
