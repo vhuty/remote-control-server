@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 import models from '../models';
-import { badRequest, unauthorized } from '../helpers/error';
+import { badRequest, unauthorized, alreadyExists } from '../helpers/error';
 
 class Controller {
   async register(req: Request, res: Response, next: NextFunction) {
@@ -13,7 +13,7 @@ class Controller {
 
     try {
       if (controller) {
-        throw badRequest('Already registered');
+        throw alreadyExists('Already registered');
       }
 
       if (!data) {
@@ -22,10 +22,7 @@ class Controller {
 
       const { meta: { name = null } = {} } = data;
 
-      const instance = {
-        id,
-        name,
-      };
+      const instance = { id, name, };
 
       //@ts-ignore
       await models.Controller.create(instance);

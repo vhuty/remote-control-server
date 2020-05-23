@@ -1,4 +1,4 @@
-const _error = (message = 'unknown', status = 500): ClientError => {
+const _error = (message = 'Unknown', status = 500): ClientError => {
   return { stack: Error().stack, status, message };
 };
 
@@ -13,6 +13,10 @@ export const unauthorized = (message = 'Unauthorized') => {
 export const forbidden = (message = 'Forbidden') => {
   return _error(message, 403);
 };
+
+export const alreadyExists = (message = 'Already exists') => {
+  return _error(message, 409);
+}
 
 type ClientError = {
   stack: string;
