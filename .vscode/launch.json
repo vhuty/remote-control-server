@@ -1,0 +1,56 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Server (Build)",
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal",
+      "program": "${workspaceFolder}/src/app.ts",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "autoAttachChildProcesses": true,
+      "outFiles": ["${workspaceFolder}/build/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Server (Launch)",
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal",
+      "program": "${workspaceFolder}/build/app.js",
+      "env": {
+        "PORT": "9999"
+      },
+      "autoAttachChildProcesses": true,
+      "outFiles": ["${workspaceFolder}/build/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Server (Heroku)",
+      "address": "localhost",
+      "port": 9229,
+      "protocol": "inspector",
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/app"
+    }
+  ],
+  "tasks": [
+    {
+      "type": "typescript",
+      "tsconfig": "tsconfig.json",
+      "problemMatcher": ["$tsc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

@@ -1,31 +1,17 @@
-import { readdirSync } from 'fs';
-import { join, basename } from 'path';
 import config from '../config';
 import pg from '../database/pg';
-import associations from '../database/associations';
-  
-const db = pg(config.pg);
-const { sequelize } = db;
+import { __associate } from '../database/associations';
 
-const currentFile = basename(__filename);
-readdirSync(__dirname)
-  .filter(
-    (file) =>
-      file.indexOf('.') !== 0 &&
-      file !== currentFile &&
-      file.slice(-3) === '.js'
-  )
-  .forEach((file) => {
-    const model = sequelize.import(join(__dirname, file));
-    db[model.name] = model;
-  });
+import { DeviceFactory } from './device';
+import { ControllerFactory } from './controller';
+import { CommandFactory } from './command';
 
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
+const { sequelize, Sequelize, Op } = pg(config.pg);
 
-associations(sequelize);
+const Device = DeviceFactory(sequelize);
+const Controller = ControllerFactory(sequelize);
+const Command = CommandFactory(sequelize);
 
-export default db;
+__associate(sequelize);
+
+export { sequelize, Sequelize, Op, Device, Controller, Command };

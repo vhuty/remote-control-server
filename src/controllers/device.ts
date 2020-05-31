@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 
-import models from '../models';
+import { Command, Device } from '../models';
 import config from '../config';
 import { badRequest, unauthorized, alreadyExists } from '../helpers/error';
 
-class Controller {
+class CTRLDevice {
   async register(req: Request, res: Response, next: NextFunction) {
     const {
-      //@ts-ignore
       device,
       body: { id, data },
     } = req;
@@ -23,10 +22,9 @@ class Controller {
 
       const { meta: { name = null, type = null } = {} } = data;
 
-      const instance = { id, name, type, };
+      const instance = { id, name, type };
 
-      //@ts-ignore
-      await models.Device.create(instance);
+      await Device.create(instance);
 
       return res.status(201).end();
     } catch (err) {
@@ -35,7 +33,6 @@ class Controller {
   }
 
   async listen(req: Request, res: Response, next: NextFunction) {
-    //@ts-ignore
     const { device } = req;
 
     try {
@@ -46,8 +43,7 @@ class Controller {
       const { id } = device;
       const key = _generateRandomKey();
 
-      //@ts-ignore
-      await models.Device.update(
+      await Device.update(
         { key, status: 'online' },
         {
           where: { id },
@@ -65,7 +61,6 @@ class Controller {
   }
 
   async stop(req: Request, res: Response, next: NextFunction) {
-    //@ts-ignore
     const { device } = req;
 
     try {
@@ -75,8 +70,7 @@ class Controller {
 
       const { id } = device;
 
-      //@ts-ignore
-      await models.Device.update(
+      await Device.update(
         {
           key: null,
           status: 'offline',
@@ -104,8 +98,7 @@ class Controller {
     const { id } = req.params;
 
     try {
-      //@ts-ignore
-      const device = await models.Device.findOne({
+      const device = await Device.findOne({
         where: { id },
       });
 
@@ -123,12 +116,67 @@ class Controller {
     }
   }
 
+  async getCommands(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+
+    try {
+      const device = await Device.findOne({
+        where: { id },
+      });
+
+      if (!device) {
+        throw badRequest('Wrong target');
+      }
+
+      const commands = await device.getCommands();
+
+      return res.status(200).json(commands);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async setCommands(req: Request, res: Response, next: NextFunction) {
+    const {
+      body: { data = [] },
+      params: { id },
+    } = req;
+
+    try {
+      const device = await Device.findOne({
+        where: { id },
+        raw: true,
+      });
+
+      if (!device) {
+        throw badRequest('Wrong target');
+      }
+
+      if (!data) {
+        throw badRequest('Missing input data');
+      }
+
+      const filtered = data.filter((cmd) => cmd.phrase && cmd.body);
+      const commands = filtered.map((cmd) => ({ ...cmd, deviceId: device.id }));
+
+      await Promise.all([
+        Command.destroy({
+          where: { deviceId: device.id },
+        }),
+        Command.bulkCreate(commands),
+      ]);
+
+      return res.status(204).end();
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async getDevice(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
 
     try {
-      //@ts-ignore
-      const device = await models.Device.findOne({
+      const device = await Device.findOne({
         where: { id },
         raw: true,
       });
@@ -151,4 +199,4 @@ function _generateRandomKey() {
   );
 }
 
-export default new Controller();
+export default new CTRLDevice();

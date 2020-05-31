@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 
-import models from '../models';
+import { Controller, Device } from '../models';
 import { badRequest, unauthorized, alreadyExists } from '../helpers/error';
 
-class Controller {
+class CTRLController {
   async register(req: Request, res: Response, next: NextFunction) {
     const {
-      //@ts-ignore
       controller,
       body: { id, data },
     } = req;
@@ -24,8 +23,7 @@ class Controller {
 
       const instance = { id, name, };
 
-      //@ts-ignore
-      await models.Controller.create(instance);
+      await Controller.create(instance);
 
       return res.status(201).end();
     } catch (err) {
@@ -35,7 +33,6 @@ class Controller {
 
   async sync(req: Request, res: Response, next: NextFunction) {
     const {
-      //@ts-ignore
       controller,
     } = req;
 
@@ -66,8 +63,7 @@ class Controller {
         throw unauthorized('Not registered');
       }
 
-      //@ts-ignore
-      const device = await models.Device.findOne({
+      const device = await Device.findOne({
         where: { key },
       });
 
@@ -101,8 +97,7 @@ class Controller {
         throw unauthorized('Not registered');
       }
 
-      //@ts-ignore
-      const device = await models.Device.findOne({
+      const device = await Device.findOne({
         where: { key },
       });
 
@@ -122,8 +117,7 @@ class Controller {
     const { id } = req.params;
 
     try {
-      //@ts-ignore
-      const controller = await models.Controller.findOne({
+      const controller = await Controller.findOne({
         where: { id },
       });
 
@@ -143,8 +137,7 @@ class Controller {
     const { id } = req.params;
 
     try {
-      //@ts-ignore
-      const controller = await models.Controller.findOne({
+      const controller = await Controller.findOne({
         where: { id },
         raw: true,
       });
@@ -160,4 +153,4 @@ class Controller {
   }
 }
 
-export default new Controller();
+export default new CTRLController();

@@ -25,11 +25,14 @@
     "ws": "^7.2.1"
   },
   "devDependencies": {
+    "@types/bluebird": "^3.5.32",
     "@types/connect-redis": "0.0.13",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.6",
     "@types/express-session": "^1.17.0",
     "@types/morgan": "^1.9.0",
+    "@types/node": "^14.0.6",
+    "@types/validator": "^13.0.0",
     "@types/ws": "^7.2.4",
     "typescript": "^3.8.3"
   }

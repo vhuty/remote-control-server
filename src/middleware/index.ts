@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-import models from '../models';
+import { Device, Controller } from '../models';
 
 const controllerRequired = async (
   req: Request,
@@ -11,12 +11,10 @@ const controllerRequired = async (
 
   if (id) {
     try {
-      //@ts-ignore
-      const controller = await models.Controller.findOne({
+      const controller = await Controller.findOne({
         where: { id },
       });
 
-      //@ts-ignore
       req.controller = controller;
     } catch (err) {
       next(err);
@@ -35,12 +33,10 @@ const deviceRequired = async (
 
   if (id) {
     try {
-      //@ts-ignore
-      const device = await models.Device.findOne({
+      const device = await Device.findOne({
         where: { id },
       });
 
-      //@ts-ignore
       req.device = device;
     } catch (err) {
       next(err);

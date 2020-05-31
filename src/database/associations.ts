@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 
-export default (sequelize: Sequelize) => {
-  const { Device, Controller } = sequelize.models;
+export const __associate = (sequelize: Sequelize) => {
+  const { Device, Controller, Command } = sequelize.models;
 
   Device.belongsToMany(Controller, {
     through: 'DeviceController',
@@ -12,4 +12,6 @@ export default (sequelize: Sequelize) => {
     through: 'DeviceController',
     foreignKey: 'controllerId',
   });
+
+  Device.hasMany(Command, { foreignKey: 'deviceId' });
 };

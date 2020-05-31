@@ -9,8 +9,8 @@ import morgan from 'morgan';
 import ws from './ws';
 import config from './config';
 import router from './routes';
-import models from './models';
 import sql from './database/sql';
+import { sequelize } from './models';
 
 const RedisStore = connectRedis(session);
 
@@ -56,7 +56,7 @@ const http = HTTP.createServer(app);
 ws.attach(http, sessionParser);
 
 /* Checking ORM availability */
-(async (_) => {
+(async () => {
   const {
     pg: {
       options: { sync, alter },
@@ -64,11 +64,12 @@ ws.attach(http, sessionParser);
     port,
   } = config;
 
-  await models.sequelize.authenticate();
-  await models.sequelize.sync({ ...sync, alter });
-  await sql.init(models.sequelize);
+  await sequelize.authenticate();
+  await sequelize.sync({ ...sync, alter });
+  await sql.init(sequelize);
 
   http.listen(port, () => {
     console.log(`Express server's been started on port: ${port}`);
+    console.log(`WebSocket server's been started on port: ${port}`);
   });
 })().catch(console.error);

@@ -1,10 +1,35 @@
-import { MODEL } from '../constants';
-import { Sequelize, DataTypes } from 'sequelize';
+import {
+  Sequelize,
+  BuildOptions,
+  DataTypes,
+  Model,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyRemoveAssociationMixin,
+  HasManyGetAssociationsMixin,
+} from 'sequelize';
 
-import { Status } from '../constants';
+import { Status, MODEL } from '../constants';
+import { Controller } from './controller';
+import { Command } from './command';
 
-export default (sequelize: Sequelize) => {
-  const device = sequelize.define(MODEL.DEVICE, {
+export class Device extends Model {
+  id!: string;
+  ip?: string;
+  key?: string;
+  name: string;
+  type: string;
+  status!: string;
+  getControllers: BelongsToManyGetAssociationsMixin<Controller>;
+  removeController: BelongsToManyRemoveAssociationMixin<Controller, string>;
+  getCommands: HasManyGetAssociationsMixin<Command>;
+}
+
+type DeviceStatic = typeof Model & {
+  new (values?: object, options?: BuildOptions): Device;
+};
+
+export const DeviceFactory = (sequelize: Sequelize) => {
+  return <DeviceStatic>sequelize.define(MODEL.DEVICE, {
     id: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -28,6 +53,4 @@ export default (sequelize: Sequelize) => {
       defaultValue: Status.OFFLINE,
     },
   });
-
-  return device;
 };
