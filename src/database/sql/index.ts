@@ -63,8 +63,13 @@ export default {
       },
       {
         phrase: 'google <query>',
-        body: 'Search something in google',
+        body: 'Make google search request',
         code: 'GOOGLE',
+      },
+      {
+        phrase: 'search <query>',
+        body: 'Search in the system search',
+        code: 'SEARCH',
       },
       {
         phrase: 'browse <web-resource>',
