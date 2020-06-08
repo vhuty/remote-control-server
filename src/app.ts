@@ -67,6 +67,7 @@ ws.attach(http, sessionParser);
   await sequelize.authenticate();
   await sequelize.sync({ ...sync, alter });
   await sql.init(sequelize);
+  await sql.preload(sequelize);
 
   http.listen(port, () => {
     console.log(`Express server's been started on port: ${port}`);

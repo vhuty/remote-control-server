@@ -24,6 +24,11 @@ export const CommandFactory = (sequelize: Sequelize) => {
     defaultManner: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+      allowNull: false,
+    },
+    code: {
+      type: DataTypes.STRING,
+      unique: true,
     },
   });
 };
