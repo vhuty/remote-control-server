@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { Command, Device } from '../models';
-import config from '../config';
+import { Command, Device, Op } from '../models';
 import { badRequest, unauthorized, alreadyExists } from '../helpers/error';
+
+import config from '../config';
 
 class CTRLDevice {
   async register(req: Request, res: Response, next: NextFunction) {
@@ -117,7 +118,10 @@ class CTRLDevice {
   }
 
   async getCommands(req: Request, res: Response, next: NextFunction) {
-    const { id } = req.params;
+    const {
+      params: { id },
+      query: { defaults },
+    } = req;
 
     try {
       const device = await Device.findOne({
@@ -128,7 +132,33 @@ class CTRLDevice {
         throw badRequest('Wrong target');
       }
 
-      const commands = await device.getCommands();
+      const withDefaults = {
+        [Op.or]: [
+          {
+            deviceId: device.id,
+          },
+          {
+            [Op.and]: [
+              {
+                deviceId: null,
+              },
+              {
+                [Op.not]: {
+                  code: null
+                }
+              }
+            ]
+          },
+        ],
+      };
+
+      const withoutDefaults = {
+        deviceId: device.id,
+      };
+
+      const commands = await Command.findAll({
+        where: defaults ? withDefaults : withoutDefaults,
+      });
 
       return res.status(200).json(commands);
     } catch (err) {

@@ -32,6 +32,7 @@
     "@types/express-session": "^1.17.0",
     "@types/morgan": "^1.9.0",
     "@types/node": "^14.0.6",
+    "@types/sequelize": "^4.28.9",
     "@types/validator": "^13.0.0",
     "@types/ws": "^7.2.4",
     "typescript": "^3.8.3"
