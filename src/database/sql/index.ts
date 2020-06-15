@@ -22,9 +22,89 @@ export default {
   preload: async (sequelize: Sequelize) => {
     const commands = [
       {
-        phrase: '[un]mute',
+        phrase: '<text> save note [as <filename>]',
+        body: 'Note pronounced text (if no filename provided, the current date will be used)',
+        code: 'NOTE',
+      },
+      {
+        phrase: 'browse <web-resource>',
+        body: 'Open web-resource in browser',
+        code: 'BROWSE',
+      },
+      {
+        phrase: 'google <query>',
+        body: 'Make google search request',
+        code: 'GOOGLE',
+      },
+      {
+        phrase: 'type <text>',
+        body: 'Type pronounced text in the focused area',
+        code: 'TYPE',
+      },
+      {
+        phrase: 'search <query>',
+        body: 'Search in the system search',
+        code: 'SEARCH',
+      },
+      {
+        phrase: 'close',
+        body: 'Close the current window',
+        code: 'CLOSE',
+      },
+      {
+        phrase: 'toggle',
+        body: 'Show or hide desktop',
+        code: 'TOGGLE',
+      },
+      {
+        phrase: 'switch',
+        body: 'Switch between opened windows',
+        code: 'SWITCH',
+      },
+      {
+        phrase: 'mute',
         body: 'Enable or disable system sounds',
         code: 'MUTE',
+      },
+      {
+        phrase: 'louder',
+        body: 'Make volume louder',
+        code: 'MUTE',
+      },
+      {
+        phrase: 'quieter',
+        body: 'Make volume quieter',
+        code: 'MUTE',
+      },
+      {
+        phrase: 'play',
+        body: 'Play current media',
+        code: 'MUTE',
+      },
+      {
+        phrase: 'pause',
+        body: 'Pause current media',
+        code: 'MUTE',
+      },
+      {
+        phrase: 'stop',
+        body: 'Stop current media',
+        code: 'MUTE',
+      },
+      {
+        phrase: 'next',
+        body: 'Play next media',
+        code: 'MUTE',
+      },
+      {
+        phrase: 'previous',
+        body: 'Play previous media',
+        code: 'MUTE',
+      },
+      {
+        phrase: 'log out',
+        body: 'Lock the screen',
+        code: 'LOGOUT',
       },
       {
         phrase: 'turn off [in <time> (seconds|minutes|hours)]',
@@ -42,53 +122,8 @@ export default {
         code: 'CANCEL',
       },
       {
-        phrase: 'log out',
-        body: 'Lock the screen',
-        code: 'LOGOUT',
-      },
-      {
-        phrase: 'toggle',
-        body: 'Show or hide desktop',
-        code: 'TOGGLE',
-      },
-      {
-        phrase: 'switch',
-        body: 'Switch between opened windows',
-        code: 'SWITCH',
-      },
-      {
-        phrase: 'close',
-        body: 'Close the current window',
-        code: 'CLOSE',
-      },
-      {
-        phrase: 'google <query>',
-        body: 'Make google search request',
-        code: 'GOOGLE',
-      },
-      {
-        phrase: 'search <query>',
-        body: 'Search in the system search',
-        code: 'SEARCH',
-      },
-      {
-        phrase: 'browse <web-resource>',
-        body: 'Open web-resource in browser',
-        code: 'BROWSE',
-      },
-      {
-        phrase: '<text> save note [as <filename>]',
-        body: 'Note pronounced text (if no filename provided, the current date will be used)',
-        code: 'NOTE',
-      },
-      {
-        phrase: 'type <text>',
-        body: 'Type pronounced text in the focused area',
-        code: 'TYPE',
-      },
-      {
-        phrase: '<key>',
-        body: 'Press key on the keyboard (use full names, e.g. "escape", "windows")',
+        phrase: '<key> [<key>...]',
+        body: 'Press key or key combination on the keyboard (use full names, e.g. "escape", "windows")',
         code: 'KEY',
       },
     ];
