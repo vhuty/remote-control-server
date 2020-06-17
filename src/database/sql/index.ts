@@ -69,37 +69,37 @@ export default {
       {
         phrase: 'louder',
         body: 'Make volume louder',
-        code: 'MUTE',
+        code: 'LOUDER',
       },
       {
         phrase: 'quieter',
         body: 'Make volume quieter',
-        code: 'MUTE',
+        code: 'QUIETER',
       },
       {
         phrase: 'play',
         body: 'Play current media',
-        code: 'MUTE',
+        code: 'PLAY',
       },
       {
         phrase: 'pause',
         body: 'Pause current media',
-        code: 'MUTE',
+        code: 'PAUSE',
       },
       {
         phrase: 'stop',
         body: 'Stop current media',
-        code: 'MUTE',
+        code: 'STOP',
       },
       {
         phrase: 'next',
         body: 'Play next media',
-        code: 'MUTE',
+        code: 'NEXT',
       },
       {
         phrase: 'previous',
         body: 'Play previous media',
-        code: 'MUTE',
+        code: 'PREVIOUS',
       },
       {
         phrase: 'log out',
